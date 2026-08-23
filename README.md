@@ -1,4 +1,4 @@
-# Standalone quadrature LO test
+#  LO Test
 
 This folder is a minimal Pico project extracted from the main PicoRX receiver so you can test the quadrature digital LO on GPIO0 and GPIO1 independently.
 
