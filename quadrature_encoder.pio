@@ -1,0 +1,99 @@
+;
+; Copyright (c) 2021 pmarques-dev @ github
+;
+; SPDX-License-Identifier: BSD-3-Clause
+;
+
+.program quadrature_encoder
+.origin 0
+
+	JMP update	; read 00
+	JMP decrement	; read 01
+	JMP increment	; read 10
+	JMP update	; read 11
+
+	JMP increment	; read 00
+	JMP update	; read 01
+	JMP update	; read 10
+	JMP decrement	; read 11
+
+	JMP decrement	; read 00
+	JMP update	; read 01
+	JMP update	; read 10
+	JMP increment	; read 11
+
+	JMP update	; read 00
+	JMP increment	; read 01
+
+decrement:
+	JMP Y--, update	; read 10
+
+.wrap_target
+update:
+	SET X, 0
+	PULL noblock
+	MOV X, OSR
+	MOV OSR, ISR
+	JMP !X, sample_pins
+	MOV ISR, Y
+	PUSH
+
+sample_pins:
+	MOV ISR, NULL
+	IN OSR, 2
+	IN PINS, 2
+	MOV PC, ISR
+
+increment:
+	MOV X, !Y
+	JMP X--, increment_cont
+increment_cont:
+	MOV Y, !X
+.wrap
+
+% c-sdk {
+#include "hardware/clocks.h"
+#include "hardware/gpio.h"
+
+static inline void quadrature_encoder_program_init(PIO pio, uint sm, uint offset, uint pin, int max_step_rate)
+{
+	pio_sm_set_consecutive_pindirs(pio, sm, pin, 2, false);
+	gpio_pull_up(pin);
+	gpio_pull_up(pin + 1);
+
+	pio_sm_config c = quadrature_encoder_program_get_default_config(offset);
+	sm_config_set_in_pins(&c, pin);
+	sm_config_set_jmp_pin(&c, pin);
+	sm_config_set_in_shift(&c, false, false, 32);
+	sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_NONE);
+
+	if (max_step_rate == 0) {
+		sm_config_set_clkdiv(&c, 1.0);
+	} else {
+		float div = (float)clock_get_hz(clk_sys) / (14 * max_step_rate);
+		sm_config_set_clkdiv(&c, div);
+	}
+
+	pio_sm_init(pio, sm, offset, &c);
+	pio_sm_set_enabled(pio, sm, true);
+}
+
+static inline void quadrature_encoder_request_count(PIO pio, uint sm)
+{
+	pio->txf[sm] = 1;
+}
+
+static inline int32_t quadrature_encoder_fetch_count(PIO pio, uint sm)
+{
+	while (pio_sm_is_rx_fifo_empty(pio, sm))
+		tight_loop_contents();
+	return pio->rxf[sm];
+}
+
+static inline int32_t quadrature_encoder_get_count(PIO pio, uint sm)
+{
+	quadrature_encoder_request_count(pio, sm);
+	return quadrature_encoder_fetch_count(pio, sm);
+}
+
+%}
