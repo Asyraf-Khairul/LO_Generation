@@ -1,4 +1,4 @@
-# Standalone Quadrature LO Generator
+# Quadrature LO Generator
 
 This repository contains a standalone Raspberry Pi Pico firmware project for testing a quadrature local oscillator outside the main PicoRX receiver codebase.
 
