@@ -45,28 +45,6 @@ clkdiv = system_clock / (4 * target_frequency)
 
 The firmware currently uses a 125 MHz system clock, starts at 7 MHz, and clamps the target frequency between 0 Hz and 30 MHz.
 
-## Build Requirements
-
-- Raspberry Pi Pico SDK
-- CMake 3.13 or newer
-- Arm GNU toolchain
-- Ninja or Make
-
-The included `CMakeLists.txt` is set up for Pico SDK 2.1.0 and the `pico` board target.
-
-## Build
-
-From the project root:
-
-```bash
-mkdir build
-cd build
-cmake -DPICO_BOARD=pico ..
-cmake --build .
-```
-
-After a successful build, copy the generated UF2 file from `build/standalone_quadrature_lo.uf2` to the Pico while it is mounted in BOOTSEL mode.
-
 ## Project Layout
 
 | File | Purpose |
