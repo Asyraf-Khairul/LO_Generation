@@ -67,16 +67,6 @@ cmake --build .
 
 After a successful build, copy the generated UF2 file from `build/standalone_quadrature_lo.uf2` to the Pico while it is mounted in BOOTSEL mode.
 
-## Serial Output
-
-USB serial is enabled. When the encoder changes the tuned frequency, the firmware prints lines like:
-
-```text
-LO target: 7250000 Hz  clkdiv: 4.308594
-```
-
-UART stdio is disabled.
-
 ## Project Layout
 
 | File | Purpose |
