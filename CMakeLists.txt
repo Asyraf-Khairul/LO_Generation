@@ -22,7 +22,7 @@ endif()
 
 set(PICO_BOARD pico CACHE STRING "Board type")
 set(PICO_SDK_FETCH_FROM_GIT ON)
-set(PICO_SDK_FETCH_FROM_GIT_TAG "2.2.0")
+set(PICO_SDK_FETCH_FROM_GIT_TAG "2.1.0")
 set(PICO_SDK_FETCH_FROM_GIT_PATH "${CMAKE_BINARY_DIR}/pico-sdk")
 
 include(${CMAKE_CURRENT_LIST_DIR}/pico_sdk_import.cmake)
@@ -33,7 +33,7 @@ pico_sdk_init()
 
 add_executable(standalone_quadrature_lo
     main.cpp
-    ssd1306.c
+    sh1106.c
 )
 
 target_compile_features(standalone_quadrature_lo PRIVATE c_std_11)

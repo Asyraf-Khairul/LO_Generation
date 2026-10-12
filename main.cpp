@@ -12,7 +12,7 @@
 #include "quadrature_encoder.pio.h"
 
 #include "pins.h"
-#include "ssd1306.h"
+#include "sh1106.h"
 #include "font_8x5.h"
 
 namespace {
@@ -39,7 +39,7 @@ float compute_clkdiv_for_frequency(uint32_t system_clock_hz, uint32_t target_fre
     return (float)rounded_divider;
 }
 
-void init_oled(ssd1306_t &disp) {
+void init_oled(sh1106_t &disp) {
     gpio_set_function(PIN_DISPLAY_SDA, GPIO_FUNC_I2C);
     gpio_set_function(PIN_DISPLAY_SCL, GPIO_FUNC_I2C);
     gpio_pull_up(PIN_DISPLAY_SDA);
@@ -48,16 +48,16 @@ void init_oled(ssd1306_t &disp) {
     i2c_init(i2c1, 400000);
 
     disp.external_vcc = false;
-    if (!ssd1306_init(&disp, 128, 64, 0x3C, i2c1)) {
+    if (!sh1106_init(&disp, 128, 64, 0x3C, i2c1)) {
         panic("OLED init failed");
     }
-    ssd1306_clear(&disp, 0);
-    ssd1306_show(&disp);
+    sh1106_clear(&disp, 0);
+    sh1106_show(&disp);
 }
 
-void draw_oled_status(ssd1306_t &disp, uint32_t target_frequency_hz) {
+void draw_oled_status(sh1106_t &disp, uint32_t target_frequency_hz) {
     char line[32];
-    ssd1306_clear(&disp, 0);
+    sh1106_clear(&disp, 0);
 
     // The 5x8 font advances 6 pixels per character. At scale 2 the old
     // "LO 7.250 MHz" title was 144 pixels wide, so it was clipped on the
@@ -67,21 +67,21 @@ void draw_oled_status(ssd1306_t &disp, uint32_t target_frequency_hz) {
     snprintf(line, sizeof(line), "%lu.%03lu MHz",
              (unsigned long)mhz, (unsigned long)khz);
     int32_t x = (128 - (int32_t)strlen(line) * 12) / 2;
-    ssd1306_draw_string(&disp, x, 0, 2, line, 1);
+    sh1106_draw_string(&disp, x, 0, 2, line, 1);
 
     snprintf(line, sizeof(line), "LO GEN: GPIO 0 & 1");
     x = (128 - (int32_t)strlen(line) * 6) / 2;
-    ssd1306_draw_string(&disp, x, 22, 1, line, 1);
+    sh1106_draw_string(&disp, x, 22, 1, line, 1);
 
     snprintf(line, sizeof(line), "PHASE: 0 & 90 DEG");
     x = (128 - (int32_t)strlen(line) * 6) / 2;
-    ssd1306_draw_string(&disp, x, 36, 1, line, 1);
+    sh1106_draw_string(&disp, x, 36, 1, line, 1);
 
     snprintf(line, sizeof(line), "TUNE STEP: 1 kHz");
     x = (128 - (int32_t)strlen(line) * 6) / 2;
-    ssd1306_draw_string(&disp, x, 50, 1, line, 1);
+    sh1106_draw_string(&disp, x, 50, 1, line, 1);
 
-    ssd1306_show(&disp);
+    sh1106_show(&disp);
 }
 
 }  // namespace
@@ -90,7 +90,7 @@ int main() {
     stdio_init_all();
     set_sys_clock_khz(125000, true);
 
-    ssd1306_t display = {};
+    sh1106_t display = {};
     init_oled(display);
 
     gpio_set_function(PIN_AB, GPIO_FUNC_PIO1);
